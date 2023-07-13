@@ -62,3 +62,5 @@ flask db upgrade
 arduino
 
 flask run
+
+The API will be accessible at http://localhost:5000.
