@@ -1,4 +1,8 @@
 from flask import abort, make_response, jsonify
+from app import db
+from datetime import datetime, timedelta
+from app.models.transaction import Transaction
+from app.models.toy import Toy
 
 def validate_model(cls, model_id):
     try:
@@ -13,8 +17,19 @@ def validate_model(cls, model_id):
     
     return model
 
-def validate_message(message):
-    if not message:
-        return make_response(jsonify(error="Message is required"), 400)
-    elif len(message) > 40:
-        return make_response(jsonify(error="Message should not exceed 40 characters"), 400)
+
+def remove_expired_reservations():
+    four_days_ago = datetime.now().date() - timedelta(days=4)
+    transactions_to_delete = Transaction.query.filter(
+    Transaction.checkout_date.is_(None), Transaction.reserve_date <= four_days_ago
+    ).all()
+
+
+    for transaction in transactions_to_delete:
+        #makes toy abailable again after 4 days
+        toy = Toy.query.get(transaction.toy_id)
+        toy.toy_status = "available"
+        db.session.delete(transaction)
+
+    db.session.commit()
+

@@ -10,7 +10,7 @@ class User(db.Model):
     phone_number = db.Column(db.String)
     address = db.Column(db.String, nullable=True)
     pin = db.Column(db.Integer)
-    toys_checked_out = db.relationship('Toy', backref='user', lazy=True, cascade="all, delete-orphan")  # One-to-many relationship
+    transactions = db.relationship('Transaction', backref='user', lazy=True)
 
     def to_dict(self):
         return {
@@ -36,4 +36,3 @@ class User(db.Model):
             address=data_dict.get('address'),
             pin=data_dict['pin']
         )
-

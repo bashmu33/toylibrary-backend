@@ -6,10 +6,8 @@ class Toy(db.Model):
     description = db.Column(db.String, nullable=True)
     age_category = db.Column(db.String, nullable=True)
     toy_status = db.Column(db.String, default=None)
-    toy_hold_number = db.Column(db.Integer, default=0)
     toy_image = db.Column(db.String, nullable=True)
-    checked_out_by_user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True) 
-
+    transactions = db.relationship('Transaction', backref='toy', lazy=True)
 
     def to_dict(self):
         return {
@@ -20,4 +18,3 @@ class Toy(db.Model):
             'toy_status': self.toy_status,
             'toy_image': self.toy_image
         }
-

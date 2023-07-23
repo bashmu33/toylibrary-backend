@@ -17,7 +17,7 @@ def create_app(test_config=None):
     
     from app.models.user import User
     from app.models.toy import Toy
-    # from app.models.checked_out_history import CheckOutHistory
+    from app.models.transaction import Transaction
         # from .models.hold import hold_toys
         # from .models.checked_out_history import CheckedOutHistory
 

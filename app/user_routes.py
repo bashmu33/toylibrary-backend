@@ -1,70 +1,27 @@
 from flask import Blueprint, request, jsonify, make_response, abort
 from app import db
-from .helper import validate_model
+from .helper import validate_model, remove_expired_reservations
 from app.models.user import User
 from app.models.toy import Toy
+from app.models.transaction import Transaction
 from datetime import datetime, timedelta
-
-
 
 
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
-# @users_bp.route('', methods=['GET'])
-# def get_all_users():
-#     users = User.query.all()
 
-#     users_response = [user.to_dict() for user in users]
-
-#     return jsonify(users_response)
-
-# @users_bp.route('/<user_id>', methods=['GET'])
-# def get_one_user(user_id):
-#     user = validate_model(User, user_id)
-
-#     return jsonify(user.to_dict())
-
-# @users_bp.route('/<user_id>/holds', methods=['GET'])
-# def get_user_holds(user_id):
-#     user = validate_model(User, user_id)
-#     holds = user.toys_on_hold
-
-#     holds_response = [toy.to_dict() for toy in holds]
-
-#     return jsonify(holds_response)
-
-# @users_bp.route('/<user_id>/checked_out', methods=['GET'])
-# def get_user_checked_out_toys(user_id):
-#     user = validate_model(User, user_id)
-#     checked_out_toys = user.checked_out_toys
-
-#     checked_out_toys_response = [toy.to_dict() for toy in checked_out_toys]
-
-#     return jsonify(checked_out_toys_response)
-
-# @users_bp.route('/<user_id>/checked_out_history', methods=['GET'])
-# def get_user_checked_out_history(user_id):
-#     user = validate_model(User, user_id)
-#     checked_out_history = user.checked_out_history
-
-#     checked_out_history_response = [history.to_dict() for history in checked_out_history]
-
-#     return jsonify(checked_out_history_response)
 
 #GET ALL USERS
 @users_bp.route('', methods=['GET'])
 def get_all_users():
     users = User.query.all()
-
     users_response = [user.to_dict() for user in users]
-
     return jsonify(users_response)
 
 #GET ONE USER
 @users_bp.route('/<user_id>', methods=['GET'])
 def get_one_user(user_id):
     user = validate_model(User, user_id)
-
     return jsonify(user.to_dict())
 
 
@@ -82,56 +39,43 @@ def create_user():
     except Exception as e:
         abort(make_response({'details': str(e)}, 400))
 
-@users_bp.route('/<int:user_id>/check_out/<int:toy_id>', methods=['POST'])
-def check_out_toy(user_id, toy_id):
-    user = User.query.get(user_id)
-    toy = Toy.query.get(toy_id)
 
-    if user and toy:
-        if toy.checked_out_by_user_id is None and toy.toy_status != 'checked_out':
-            if len(user.toys_checked_out) < 4:
-                toy.checked_out_by_user_id = user.user_id
-                toy.toy_status = 'checked_out'
+@users_bp.route('/<user_id>/reserve/<toy_id>', methods=['POST'])
+def reserve_toy(user_id, toy_id):
+    user = validate_model(User, user_id)
+    toy = validate_model(Toy, toy_id)
 
-                # Calculate due date as 4 weeks from the check-out date
-                check_out_date = datetime.now().date()
-                due_date = check_out_date + timedelta(weeks=4)
+    if toy.toy_status != "available":
+        return jsonify({'message': f'Toy with ID {toy_id} is not available for reservation'}), 400
 
-                db.session.commit()
+    new_transaction = Transaction(user_id=user_id, toy_id=toy_id, reserve_date=datetime.now().date())
+    db.session.add(new_transaction)
 
-                return jsonify({
-                    'message': 'Toy checked out successfully.',
-                    'check_out_date': check_out_date,
-                    'due_date': due_date
-                })
-            else:
-                return jsonify({'message': 'User has reached the maximum limit of checked-out toys.'}), 400
-        else:
-            return jsonify({'message': 'The toy is already checked out.'}), 400
-    else:
-        return jsonify({'message': 'Invalid user or toy.'}), 400
-    
-@users_bp.route('/<int:user_id>/toys_checked_out', methods=['GET'])
-def get_toys_checked_out_by_user(user_id):
-    user = User.query.get(user_id)
+    toy.toy_status = "unavailable"
+    db.session.commit()
 
-    if user:
-        toys_checked_out = user.toys_checked_out
-        toy_list = [toy.to_dict() for toy in toys_checked_out]
-        return jsonify({'toys_checked_out': toy_list})
-    else:
-        return jsonify({'message': 'Invalid user.'}), 400
+    return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with ID {user_id}'}), 200
 
 
+@users_bp.route('/<user_id>/return/<transaction_id>', methods=['POST'])
+def return_toy(user_id, transaction_id):
+    user = validate_model(User, user_id)
+    transaction = validate_model(Transaction, transaction_id)
 
+    if transaction.user_id != user_id:
+        return jsonify({'message': 'Unauthorized'}), 403
 
+    if not transaction.checkout_date or transaction.return_date:
+        return jsonify({'message': 'Invalid operation. Toy is either not checked out or already returned.'}), 400
 
+    transaction.return_date = datetime.now().date()
+    db.session.commit()
 
+    # Update the toy status 
+    toy = Toy.query.get(transaction.toy_id)
+    toy.toy_status = "available"
+    db.session.commit()
 
-
-
-
-
-
+    return jsonify({'message': f'Toy with ID {transaction.toy_id} has been returned by User with ID {user_id}'}), 200
 
 
