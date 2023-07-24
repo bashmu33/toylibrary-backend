@@ -58,10 +58,10 @@ def return_toy(transaction_id):
 def get_transactions_by_user(user_id):
     user = validate_model(User, user_id)
 
-    # Fetch all transactions for the user, including associated toy information
+    
     transactions = Transaction.query.filter_by(user_id=user_id).all()
 
-    # Prepare a response JSON containing all relevant information for each transaction
+
     transactions_response = []
     for transaction in transactions:
         toy = Toy.query.get(transaction.toy_id)
@@ -69,7 +69,7 @@ def get_transactions_by_user(user_id):
         transaction_info = {
             'transaction_id': transaction.transaction_id,
             'toy_id': toy.toy_id,
-            'toy_name': toy.name,
+            'toy_name': toy.toy_name,
             'status': status,
             'reserve_date': transaction.reserve_date,
             'checkout_date': transaction.checkout_date,
