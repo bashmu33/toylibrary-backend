@@ -5,7 +5,7 @@ class Toy(db.Model):
     toy_name = db.Column(db.String)
     description = db.Column(db.String, nullable=True)
     age_category = db.Column(db.String, nullable=True)
-    toy_status = db.Column(db.String, default=None)
+    toy_status = db.Column(db.String, default='available')
     toy_image = db.Column(db.String, nullable=True)
     transactions = db.relationship('Transaction', backref='toy', lazy=True)
 
@@ -16,5 +16,4 @@ class Toy(db.Model):
             'description': self.description,
             'age_category': self.age_category,
             'toy_status': self.toy_status,
-            'toy_image': self.toy_image
         }

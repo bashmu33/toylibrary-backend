@@ -33,5 +33,8 @@ def create_app(test_config=None):
     from app.toy_routes import toys_bp
     app.register_blueprint(toys_bp)
 
+    from app.transaction_routes import transactions_bp
+    app.register_blueprint(transactions_bp)
+
 
     return app

@@ -4,11 +4,10 @@ from .helper import validate_model, remove_expired_reservations
 from app.models.user import User
 from app.models.toy import Toy
 from app.models.transaction import Transaction
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 
 users_bp = Blueprint('users', __name__, url_prefix='/users')
-
 
 
 #GET ALL USERS
@@ -40,42 +39,71 @@ def create_user():
         abort(make_response({'details': str(e)}, 400))
 
 
-@users_bp.route('/<user_id>/reserve/<toy_id>', methods=['POST'])
+@users_bp.route('', methods=['POST'])
 def reserve_toy(user_id, toy_id):
     user = validate_model(User, user_id)
     toy = validate_model(Toy, toy_id)
 
-    if toy.toy_status != "available":
-        return jsonify({'message': f'Toy with ID {toy_id} is not available for reservation'}), 400
+    if toy.toy_status == "checked_out":
+        return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and unavailable for reservation'}), 400
+    elif toy.toy_status == "reserved":
+        return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 400
 
     new_transaction = Transaction(user_id=user_id, toy_id=toy_id, reserve_date=datetime.now().date())
     db.session.add(new_transaction)
 
-    toy.toy_status = "unavailable"
+    toy.toy_status = "reserved"
     db.session.commit()
 
     return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with ID {user_id}'}), 200
 
-
-@users_bp.route('/<user_id>/return/<transaction_id>', methods=['POST'])
-def return_toy(user_id, transaction_id):
+@users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
+def checkout_toy(user_id, toy_id):
     user = validate_model(User, user_id)
-    transaction = validate_model(Transaction, transaction_id)
+    toy = validate_model(Toy, toy_id)
 
-    if transaction.user_id != user_id:
-        return jsonify({'message': 'Unauthorized'}), 403
+    if toy.toy_status == "checked_out":
+        return jsonify({'message': f'Toy with ID {toy_id} is already checked out'}), 400
 
-    if not transaction.checkout_date or transaction.return_date:
-        return jsonify({'message': 'Invalid operation. Toy is either not checked out or already returned.'}), 400
+    if toy.toy_status == "available":
+        #Checking out toy
+        checkout_date = datetime.now().date()
+        due_date = checkout_date + timedelta(days=28)
+        new_transaction = Transaction(user_id=user_id, toy_id=toy_id, checkout_date=checkout_date, due_date=due_date)
+        db.session.add(new_transaction)
+        toy.toy_status = "checked_out"
+    else:
+        #check if toy is reserved here
+        existing_reservation = Transaction.query.filter_by(user_id=user_id, toy_id=toy_id, checkout_date=None).first()
+        if existing_reservation:
+            existing_reservation.checkout_date = datetime.now().date()
+            existing_reservation.due_date = existing_reservation.checkout_date + timedelta(days=28)
+            toy.toy_status = "checked_out"
+        else:
+            # below the toy is reserved by a different user so it cant be checked out
+            return jsonify({'message': f'Toy with ID {toy_id} is reserved by another user'}), 400
 
-    transaction.return_date = datetime.now().date()
     db.session.commit()
 
-    # Update the toy status 
-    toy = Toy.query.get(transaction.toy_id)
-    toy.toy_status = "available"
-    db.session.commit()
+    return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
 
-    return jsonify({'message': f'Toy with ID {transaction.toy_id} has been returned by User with ID {user_id}'}), 200
+@users_bp.route('/<user_id>/fines', methods=['GET'])
+def calculate_fines(user_id):
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    fines = 0.0
+    for transaction in user.transactions:
+        if transaction.checkout_date and transaction.return_date and isinstance(transaction.return_date, date):
+            due_date = date.fromisoformat(transaction.due_date) if isinstance(transaction.due_date, str) else transaction.due_date
+            if transaction.return_date > due_date:
+                days_overdue = (transaction.return_date - due_date).days
+                fines += 0.25 * days_overdue
+
+    return jsonify({'user_id': user_id, 'fines': fines})
+
+
 
 

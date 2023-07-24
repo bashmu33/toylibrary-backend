@@ -35,3 +35,15 @@ def create_toy():
         abort(make_response({'details': f'Missing field: {str(e)}'}, 400))
     except Exception as e:
         abort(make_response({'details': str(e)}, 400))
+
+#DELETE A TOY FROM THE DATABASE
+@toys_bp.route('/<toy_id>', methods=['DELETE'])
+def delete_toy(toy_id):
+    toy = validate_model(Toy, toy_id)
+
+    try:
+        db.session.delete(toy)
+        db.session.commit()
+        return jsonify({'message': f'Toy with ID {toy_id} has been deleted successfully'}), 200
+    except Exception as e:
+        abort(make_response({'details': str(e)}, 500))
