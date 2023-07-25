@@ -18,7 +18,7 @@ def get_all_transactions():
     return jsonify(transactions_response)
 
 
-# DELETE A RESERVATION
+#Delete a reservation
 @transactions_bp.route('/<user_id>/remove_reservation/<toy_id>', methods=['DELETE'])
 def remove_reservation(user_id, toy_id):
     transaction = Transaction.query.filter_by(user_id=user_id, toy_id=toy_id, checkout_date=None).first()
@@ -26,18 +26,25 @@ def remove_reservation(user_id, toy_id):
     if not transaction:
         return jsonify({'message': 'Reservation not found for the specified user and toy'}), 404
 
+    toy = Toy.query.get(toy_id)
+    if toy.toy_status == "checked_out":
+        return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and the reservation cannot be removed'}), 400
+
     try:
         db.session.delete(transaction)
-        toy = Toy.query.get(toy_id)
         toy.toy_status = "available"
         db.session.commit()
         return jsonify({'message': 'Reservation has been removed successfully'}), 200
     except Exception as e:
         abort(make_response({'details': str(e)}, 500))
 
+#return a toy 
 @transactions_bp.route('/<transaction_id>/return_toy', methods=['POST'])
 def return_toy(transaction_id):
     transaction = validate_model(Transaction, transaction_id)
+
+    if not transaction.checkout_date:
+        return jsonify({'message': 'This toy was not checked out and cannot be returned'}), 400
 
     if transaction.return_date is not None:
         return jsonify({'message': 'This toy has already been returned'}), 400
@@ -54,6 +61,7 @@ def return_toy(transaction_id):
     except Exception as e:
         abort(make_response({'details': str(e)}, 500))
 
+#get all transactions by user
 @transactions_bp.route('/user/<user_id>', methods=['GET'])
 def get_transactions_by_user(user_id):
     user = validate_model(User, user_id)

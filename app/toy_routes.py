@@ -37,13 +37,16 @@ def create_toy():
         abort(make_response({'details': str(e)}, 400))
 
 #DELETE A TOY FROM THE DATABASE
-@toys_bp.route('/<toy_id>', methods=['DELETE'])
-def delete_toy(toy_id):
+@toys_bp.route('/<toy_id>/confirm_delete', methods=['DELETE'])
+def confirm_delete_toy(toy_id):
     toy = validate_model(Toy, toy_id)
 
     try:
+        # Delete the toy even if there are associated transactions
         db.session.delete(toy)
         db.session.commit()
-        return jsonify({'message': f'Toy with ID {toy_id} has been deleted successfully'}), 200
+
+        return jsonify({'message': 'Toy has been deleted successfully'}), 200
     except Exception as e:
-        abort(make_response({'details': str(e)}, 500))
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

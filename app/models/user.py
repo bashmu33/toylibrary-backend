@@ -10,7 +10,7 @@ class User(db.Model):
     phone_number = db.Column(db.String)
     address = db.Column(db.String, nullable=True)
     pin = db.Column(db.Integer)
-    transactions = db.relationship('Transaction', backref='user', lazy=True)
+    transactions = db.relationship('Transaction', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def to_dict(self):
         return {

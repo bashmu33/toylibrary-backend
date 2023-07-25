@@ -38,8 +38,8 @@ def create_user():
     except Exception as e:
         abort(make_response({'details': str(e)}, 400))
 
-
-@users_bp.route('', methods=['POST'])
+#reserve a toy
+@users_bp.route('/<user_id>/reserve/<toy_id>', methods=['POST'])
 def reserve_toy(user_id, toy_id):
     user = validate_model(User, user_id)
     toy = validate_model(Toy, toy_id)
@@ -57,6 +57,7 @@ def reserve_toy(user_id, toy_id):
 
     return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with ID {user_id}'}), 200
 
+#check out a toy
 @users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
 def checkout_toy(user_id, toy_id):
     user = validate_model(User, user_id)
@@ -87,6 +88,7 @@ def checkout_toy(user_id, toy_id):
 
     return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
 
+#get all fines
 @users_bp.route('/<user_id>/fines', methods=['GET'])
 def calculate_fines(user_id):
     user = User.query.get(user_id)
