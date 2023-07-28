@@ -14,7 +14,6 @@ Flask-Migrate==4.0.4
 flask-restx==1.1.0
 Flask-SQLAlchemy==3.0.5
 future==0.18.3
-gevent==23.7.0
 greenlet==2.0.2
 idna==3.4
 iniconfig==1.1.1
