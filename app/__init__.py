@@ -9,7 +9,7 @@ migrate = Migrate()
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": ["https://fw-toy-library-b75c4b0033c3.onrender.com"]}})
+    CORS(app, resources={r"/users/*": {"origins": ["http://localhost:3000", "https://fw-toy-library-b75c4b0033c3.herokuapp.com"]}})
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
@@ -23,14 +23,6 @@ def create_app(test_config=None):
     from app.models.user import User
     from app.models.toy import Toy
     from app.models.transaction import Transaction
-        # from .models.hold import hold_toys
-        # from .models.checked_out_history import CheckedOutHistory
-
-    # users_toys = db.Table('users_toys',
-    #         db.Column('user_id', db.Integer, db.ForeignKey('user.user_id')),
-    #         db.Column('toy_id', db.Integer, db.ForeignKey('toy.toy_id')),
-    #         db.Column('status', db.String)
-        # )
 
     from app.user_routes import users_bp
     app.register_blueprint(users_bp)
