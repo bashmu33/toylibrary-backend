@@ -9,7 +9,7 @@ migrate = Migrate()
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, origins=['https://fw-toy-library-b75c4b0033c3.herokuapp.com', 'http://localhost:3000'], supports_credentials=True)
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     #app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
