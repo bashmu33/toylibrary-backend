@@ -9,11 +9,13 @@ toys_bp = Blueprint('toys', __name__, url_prefix='/toys')
 #GET ALL TOYS
 @toys_bp.route('', methods=['GET'])
 def get_all_toys():
-    toys = Toy.query.all()
-
-    toys_response = [toy.to_dict() for toy in toys]
-
-    return jsonify(toys_response)
+    name_query = request.args.get("toy_name")
+    if name_query:
+        toys = Toy.query.filter_by(toy_name = name_query)
+    else:
+        toys = Toy.query.all()
+    results = [toy.to_dict() for toy in toys]
+    return jsonify(results), 200
 
 #GET ONE TOY
 @toys_bp.route('/<toy_id>', methods=['GET'])
@@ -21,6 +23,15 @@ def get_one_toy(toy_id):
     toy = validate_model(Toy, toy_id)
 
     return jsonify(toy.to_dict())
+
+# #GET TOYS BY NAME
+# @toys_bp.route('', methods=["GET"])
+# def get_toy_by_name():
+#     name_query = request.args.get("toy_name")
+#     if name_query:
+#         toys = Toy.query.filter_by(toy_name = name_query)
+#     results = [toy.to_dict() for toy in toys]
+#     return jsonify(results), 200
 
 #CREATE A NEW TOY
 @toys_bp.route('', methods=['POST'])
