@@ -39,9 +39,9 @@ def create_user():
         abort(make_response({'details': str(e)}, 400))
 
 #reserve a toy
-@users_bp.route('/<user_id>/reserve/<toy_id>', methods=['POST'])
-def reserve_toy(user_id, toy_id):
-    user = validate_model(User, user_id)
+@users_bp.route('/<firebase_uid>/reserve/<toy_id>', methods=['POST'])
+def reserve_toy(firebase_uid, toy_id):
+    user = validate_model(User, firebase_uid)
     toy = validate_model(Toy, toy_id)
 
     if toy.toy_status == "checked_out":
@@ -49,7 +49,7 @@ def reserve_toy(user_id, toy_id):
     elif toy.toy_status == "reserved":
         return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 400
 
-    new_transaction = Transaction(user_id=user_id, toy_id=toy_id, reserve_date=datetime.now().date())
+    new_transaction = Transaction(firebase_uid=firebase_uid, toy_id=toy_id, reserve_date=datetime.now().date())
     db.session.add(new_transaction)
 
     toy.toy_status = "reserved"
