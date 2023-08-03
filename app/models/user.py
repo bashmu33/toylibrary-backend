@@ -2,7 +2,7 @@ from app import db
 
 class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    firebase_uid = db.Column(db.String(128), unique=True, nullable=False)
+    firebase_uid = db.Column(db.String)
     first_name = db.Column(db.String)
     last_name = db.Column(db.String)
     date_of_birth = db.Column(db.Date)
