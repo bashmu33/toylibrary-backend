@@ -35,13 +35,23 @@ def remove_expired_reservations():
     db.session.commit()
 
 def validate_user_by_firebase_uid(firebase_uid):
-    print("Attempting to validate user with firebase_uid:", firebase_uid)
-    user = User.query.filter_by(firebase_uid=firebase_uid).first()
+    try:
+        # Print a message before attempting to establish the database connection
+        print("Attempting to establish database connection...")
 
-    if not user:
-        print("User not found for firebase_uid:", firebase_uid)
-        abort(make_response({'message': 'User not found'}, 404))
+        user = User.query.filter_by(firebase_uid=firebase_uid).first()
 
-    return user
+        # Print a message after attempting to establish the database connection
+        print("Database connection established.")
+
+        if not user:
+            print("User not found for firebase_uid:", firebase_uid)
+            abort(make_response({'message': 'User not found'}, 404))
+
+        return user
+    except Exception as e:
+        # Print any exceptions that occur during the process
+        print("Exception occurred:", e)
+        raise e
 
 
