@@ -16,4 +16,5 @@ class Toy(db.Model):
             'description': self.description,
             'age_category': self.age_category,
             'toy_status': self.toy_status,
+            'toy_image': self.toy_image,
         }
