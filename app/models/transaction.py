@@ -8,7 +8,7 @@ class Transaction(db.Model):
     return_date = db.Column(db.Date, nullable=True)
     reserve_date = db.Column(db.Date, nullable=True)
     overdue_fines = db.Column(db.Float, default=0.0)
-    firebase_uid = db.Column(db.Integer, db.ForeignKey('user.firebase_uid'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     toy_id = db.Column(db.Integer, db.ForeignKey('toy.toy_id'), nullable=False)
 
 
@@ -34,7 +34,7 @@ class Transaction(db.Model):
             'return_date': return_date_str,
             'reserve_date': reserve_date_str,
             'overdue_fines': overdue_fines,
-            'firebase_uid': self.firebase_uid,
+            'user_id': self.user_id,
             'toy_id': self.toy_id,
             'reserve_status': reserve_status
         }

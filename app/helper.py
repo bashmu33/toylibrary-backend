@@ -3,6 +3,7 @@ from app import db
 from datetime import datetime, timedelta
 from app.models.transaction import Transaction
 from app.models.toy import Toy
+from app.models.user import User
 
 def validate_model(cls, model_id):
     try:
@@ -32,4 +33,13 @@ def remove_expired_reservations():
         db.session.delete(transaction)
 
     db.session.commit()
+
+def validate_user_by_firebase_uid(firebase_uid):
+    user = User.query.filter_by(firebase_uid=firebase_uid).first()
+
+    if not user:
+        abort(make_response({'message': 'User not found'}, 404))
+
+    return user
+
 

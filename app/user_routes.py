@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, make_response, abort
 from app import db
-from .helper import validate_model, remove_expired_reservations
+from .helper import validate_model, validate_user_by_firebase_uid
 from app.models.user import User
 from app.models.toy import Toy
 from app.models.transaction import Transaction
@@ -41,7 +41,7 @@ def create_user():
 #reserve a toy
 @users_bp.route('/<firebase_uid>/reserve/<toy_id>', methods=['POST'])
 def reserve_toy(firebase_uid, toy_id):
-    user = validate_model(User, firebase_uid)
+    user = validate_user_by_firebase_uid(firebase_uid)
     toy = validate_model(Toy, toy_id)
 
     if toy.toy_status == "checked_out":
@@ -49,13 +49,14 @@ def reserve_toy(firebase_uid, toy_id):
     elif toy.toy_status == "reserved":
         return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 400
 
-    new_transaction = Transaction(firebase_uid=firebase_uid, toy_id=toy_id, reserve_date=datetime.now().date())
+    new_transaction = Transaction(user_id=user.user_id, toy_id=toy_id, reserve_date=datetime.now().date())
     db.session.add(new_transaction)
 
     toy.toy_status = "reserved"
     db.session.commit()
 
-    return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with ID {user_id}'}), 200
+    return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with Firebase UID {firebase_uid}'}), 200
+
 
 #check out a toy
 @users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
