@@ -24,42 +24,19 @@ def get_one_user(user_id):
     return jsonify(user.to_dict())
 
 
-# #CREATE A NEW USER
-# @users_bp.route('', methods=['POST'])
-# def create_user():
-#     request_body = request.get_json()
-#     try:
-#         new_user = User.from_dict(request_body)
-#         db.session.add(new_user)
-#         db.session.commit()
-#         return make_response({'new_user': new_user.to_dict()}, 201)
-#     except KeyError as e:
-#         abort(make_response({'details': f'Missing field: {str(e)}'}, 400))
-#     except Exception as e:
-#         abort(make_response({'details': str(e)}, 400))
-
-import logging
-@users_bp.route('/<user_id>', methods=['GET'])
+#CREATE A NEW USER
+@users_bp.route('', methods=['POST'])
 def create_user():
     request_body = request.get_json()
     try:
         new_user = User.from_dict(request_body)
-        logging.debug('Creating a new user:')
-        logging.debug('Request JSON data: %s', request_body)
-        logging.debug('User data: %s', new_user.to_dict())  # Log the user data that will be added
-
         db.session.add(new_user)
         db.session.commit()
-
-        logging.info('User created successfully')
         return make_response({'new_user': new_user.to_dict()}, 201)
     except KeyError as e:
-        logging.error('Error creating user: Missing field - %s', str(e))
         abort(make_response({'details': f'Missing field: {str(e)}'}, 400))
     except Exception as e:
-        logging.error('Error creating user: %s', str(e))
         abort(make_response({'details': str(e)}, 400))
-
 
 #reserve a toy
 @users_bp.route('/<firebase_uid>/reserve/<toy_id>', methods=['POST'])
