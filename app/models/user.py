@@ -13,6 +13,7 @@ class User(db.Model):
     def to_dict(self):
         return {
             'user_id': self.user_id,
+            'firebase_uid': self.firebase_uid,
             'first_name': self.first_name,
             'last_name': self.last_name,
             'date_of_birth': self.date_of_birth.strftime('%Y-%m-%d'),
