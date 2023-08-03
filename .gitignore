@@ -1,4 +1,9 @@
-SQLALCHEMY_DATABASE_URI=postgresql+psycopg2://postgres:postgres@localhost:5432/toy_library_development
-# RENDER_DATABASE_URI=postgresql+psycopg2://toy_library_api_db_user:cjRjgRtGOcBUiI5zl6goVkOAINtHi12R@dpg-cj1sqtmnqqla1djq2a8g-a.ohio-postgres.render.com/toy_library_api_db
 
-RENDER_DATABASE_URI=postgresql+psycopg2://toy_library_api_db_8lkt_user:cu1STiTJMAKs9XUeugcbT8mbV8PENzCB@dpg-cj5btkme546c739hkngg-a.ohio-postgres.render.com/toy_library_api_db_8lkt
+
+# Python virtual environment
+venv/
+
+# Environment variables
+.env
+
+
