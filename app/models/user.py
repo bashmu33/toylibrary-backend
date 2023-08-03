@@ -24,7 +24,7 @@ class User(db.Model):
     @classmethod
     def from_dict(cls, data_dict):
         return cls(
-            firebase_uid=data_dict['firebase_uid']
+            firebase_uid=data_dict['firebase_uid'],
             first_name=data_dict['first_name'],
             last_name=data_dict['last_name'],
             date_of_birth=data_dict['date_of_birth'],
