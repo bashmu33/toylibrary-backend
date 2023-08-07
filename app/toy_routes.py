@@ -3,6 +3,7 @@ from app import db
 from .helper import validate_model
 from app.models.user import User
 from app.models.toy import Toy
+from app.models.transaction import Transaction
 
 toys_bp = Blueprint('toys', __name__, url_prefix='/toys')
 
@@ -53,8 +54,15 @@ def confirm_delete_toy(toy_id):
     toy = validate_model(Toy, toy_id)
 
     try:
-        # Delete the toy even if there are associated transactions
+        # Update associated transactions with toy_id set to null
+        transactions_to_update = Transaction.query.filter_by(toy_id=toy_id).all()
+        for transaction in transactions_to_update:
+            transaction.toy_id = None
+
+        # Now delete the toy
         db.session.delete(toy)
+        
+        # Commit changes
         db.session.commit()
 
         return jsonify({'message': 'Toy has been deleted successfully'}), 200
