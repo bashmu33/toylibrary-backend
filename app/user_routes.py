@@ -68,26 +68,32 @@ def checkout_toy(user_id, toy_id):
         return jsonify({'message': f'Toy with ID {toy_id} is already checked out'}), 400
 
     if toy.toy_status == "available":
-        #Checking out toy
+        # Check if user has already checked out 4 toys
+        checked_out_toys_count = Transaction.query.filter_by(user_id=user_id, checkout_date=None).count()
+        if checked_out_toys_count >= 4:
+            return jsonify({'message': 'User has already checked out the maximum number of toys (4)'}), 400
+
+        # Checking out toy
         checkout_date = datetime.now().date()
         due_date = checkout_date + timedelta(days=28)
         new_transaction = Transaction(user_id=user_id, toy_id=toy_id, checkout_date=checkout_date, due_date=due_date)
         db.session.add(new_transaction)
         toy.toy_status = "checked_out"
     else:
-        #check if toy is reserved here
-        existing_reservation = Transaction.query.filter_by(user_id=user_id, toy_id=toy_id, checkout_date=None).first()
+        # Check if toy is reserved here
+        existing_reservation = Transaction.query.filter_by(user_id=user_id, toy_id=toy_id).first()
         if existing_reservation:
             existing_reservation.checkout_date = datetime.now().date()
             existing_reservation.due_date = existing_reservation.checkout_date + timedelta(days=28)
             toy.toy_status = "checked_out"
         else:
-            # below the toy is reserved by a different user so it cant be checked out
+            # Below, the toy is reserved by a different user, so it can't be checked out
             return jsonify({'message': f'Toy with ID {toy_id} is reserved by another user'}), 400
 
     db.session.commit()
 
     return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
+
 
 #get all fines
 @users_bp.route('/<user_id>/fines', methods=['GET'])
