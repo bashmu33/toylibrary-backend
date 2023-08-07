@@ -27,6 +27,7 @@ def remove_reservation(user_id, toy_id):
         return jsonify({'message': 'Reservation not found for the specified user and toy'}), 404
 
     toy = Toy.query.get(toy_id)
+
     if toy.toy_status == "checked_out":
         return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and the reservation cannot be removed'}), 400
 
@@ -37,6 +38,7 @@ def remove_reservation(user_id, toy_id):
         return jsonify({'message': 'Reservation has been removed successfully'}), 200
     except Exception as e:
         abort(make_response({'details': str(e)}, 500))
+
 
 #return a toy 
 @transactions_bp.route('/<transaction_id>/return_toy', methods=['POST'])

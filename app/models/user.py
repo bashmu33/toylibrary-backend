@@ -8,7 +8,7 @@ class User(db.Model):
     date_of_birth = db.Column(db.Date)
     email = db.Column(db.String)
     phone_number = db.Column(db.String)
-    transactions = db.relationship('Transaction', backref='user', lazy=True, cascade='all, delete-orphan')
+    transactions = db.relationship('Transaction', backref='user', lazy=True)
 
     def to_dict(self):
         return {
