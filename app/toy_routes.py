@@ -58,11 +58,9 @@ def confirm_delete_toy(toy_id):
         transactions_to_update = Transaction.query.filter_by(toy_id=toy_id).all()
         for transaction in transactions_to_update:
             transaction.toy_id = None
-
-        # Now delete the toy
+        
         db.session.delete(toy)
         
-        # Commit changes
         db.session.commit()
 
         return jsonify({'message': 'Toy has been deleted successfully'}), 200

@@ -9,7 +9,7 @@ class Transaction(db.Model):
     reserve_date = db.Column(db.Date, nullable=True)
     overdue_fines = db.Column(db.Float, default=0.0)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    toy_id = db.Column(db.Integer, db.ForeignKey('toy.toy_id'), nullable=False)
+    toy_id = db.Column(db.Integer, db.ForeignKey('toy.toy_id'), nullable=True)
 
 
     def to_dict(self):

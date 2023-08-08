@@ -33,11 +33,12 @@ def remove_reservation(user_id, toy_id):
 
     try:
         db.session.delete(transaction)
-        toy.toy_status = "available"
+        toy.toy_status = "available"  # Change the toy status to "available"
         db.session.commit()
         return jsonify({'message': 'Reservation has been removed successfully'}), 200
     except Exception as e:
         abort(make_response({'details': str(e)}, 500))
+
 
 
 #return a toy 
