@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from app.models.transaction import Transaction
 from app.models.toy import Toy
 from app.models.user import User
+from vonage import Client, Sms
+from datetime import datetime, timedelta
 
 def validate_model(cls, model_id):
     try:
@@ -53,5 +55,21 @@ def validate_user_by_firebase_uid(firebase_uid):
         # Print any exceptions that occur during the process
         print("Exception occurred:", e)
         raise e
+
+
+def send_due_date_sms(user_phone_number, api_key, api_secret, vonage_number):
+    client = Client(key=api_key, secret=api_secret)
+    due_date = datetime.now().date() + timedelta(days=2)
+    message = f"Reminder: Your toy is due on {due_date}. Please return it on time."
+
+    sms = Sms(client=client)
+    response = sms.send_message({
+        'from': vonage_number,
+        'to': user_phone_number,
+        'text': message
+    })
+
+    return response
+
 
 

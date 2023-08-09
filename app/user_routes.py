@@ -38,6 +38,20 @@ def create_user():
     except Exception as e:
         abort(make_response({'details': str(e)}, 400))
 
+#Delete user route
+@users_bp.route('/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = validate_model(User, user_id)
+
+    try:
+        # Delete user and associated transactions
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'message': 'User has been deleted successfully'}), 200
+    except Exception as e:
+        abort(make_response({'details': str(e)}, 500))
+
+
 #reserve a toy
 @users_bp.route('/<firebase_uid>/reserve/<toy_id>', methods=['POST'])
 def reserve_toy(firebase_uid, toy_id):
