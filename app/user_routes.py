@@ -38,18 +38,20 @@ def create_user():
     except Exception as e:
         abort(make_response({'details': str(e)}, 400))
 
-#Delete user route
-@users_bp.route('/<user_id>', methods=['DELETE'])
+# DELETE a user
+@users_bp.route('/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = validate_model(User, user_id)
-
+    
     try:
-        # Delete user and associated transactions
+        # Delete the user
         db.session.delete(user)
         db.session.commit()
-        return jsonify({'message': 'User has been deleted successfully'}), 200
+        
+        return make_response({'message': f'User with ID {user_id} has been deleted'}, 200)
     except Exception as e:
-        abort(make_response({'details': str(e)}, 500))
+        db.session.rollback()
+        abort(make_response({'details': str(e)}, 400))
 
 
 #reserve a toy
