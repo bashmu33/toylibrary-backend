@@ -109,8 +109,8 @@ def checkout_toy(user_id, toy_id):
                 toy.toy_status = "checked_out"
                 db.session.commit()
                 return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
-            else:
-                return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 400
+            # else:
+            #     return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 400
         else:
             # Below, the toy is reserved by a different user, so it can't be checked out
             return jsonify({'message': 'No reservation found for the selected user'}), 400
