@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, make_response, abort
 from app import db
-from .helper import validate_model, send_due_date_sms
+from .helper import validate_model
 from app.models.user import User
 from app.models.toy import Toy
 from app.models.transaction import Transaction
@@ -94,18 +94,3 @@ def get_transactions_by_user(user_id):
 
     return jsonify(transactions_response)
 
-
-# @transactions_bp.route('/<transaction_id>/send_due_date_notification', methods=['POST'])
-# def send_due_date_notification(transaction_id):
-#     transaction = validate_model(Transaction, transaction_id)
-#     user = User.query.get(transaction.user_id)
-
-#     # Load Vonage API credentials from environment variables
-#     vonage_api_key = os.environ.get('VONAGE_API_KEY')  # Replace with your actual environment variable names
-#     vonage_api_secret = os.environ.get('VONAGE_API_SECRET')
-#     vonage_number = os.environ.get('YOUR_VONAGE_NUMBER')
-
-#     # Assuming user_phone_number is a valid phone number stored in the user table
-#     send_due_date_sms(user.phone_number, vonage_api_key, vonage_api_secret, vonage_number)
-
-#     return jsonify({'message': 'Due date notification sent'}), 200
