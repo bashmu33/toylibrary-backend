@@ -67,3 +67,19 @@ def confirm_delete_toy(toy_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+# Make all toys available 
+@toys_bp.route('/set_all_available', methods=['PUT'])
+def set_all_toys_available():
+    try:
+        toys = Toy.query.all()
+        for toy in toys:
+            toy.toy_status = 'available'
+        
+        db.session.commit()
+
+        return jsonify({'message': 'All toy statuses have been set to available'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
