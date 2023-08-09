@@ -94,3 +94,17 @@ def get_transactions_by_user(user_id):
 
     return jsonify(transactions_response)
 
+# DELETE ALL ALL TRANSACTIONS
+@transactions_bp.route('/delete_all', methods=['DELETE'])
+def delete_all_transactions():
+    try:
+        # Delete all transactions
+        Transaction.query.delete()
+        db.session.commit()
+
+        return jsonify({'message': 'All transactions have been deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        abort(make_response({'details': str(e)}, 500))
+
+
