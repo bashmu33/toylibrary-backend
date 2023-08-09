@@ -134,5 +134,16 @@ def remove_all_reservations():
         db.session.rollback()
         abort(make_response({'details': str(e)}, 500))
 
+@transactions_bp.route('/user/<user_id>/checkouts', methods=['GET'])
+def get_user_checkouts(user_id):
+    transactions = Transaction.query.filter_by(user_id=user_id).filter(Transaction.checkout_date != None).all()
+    checkouts = [transaction.to_dict() for transaction in transactions]
+    return jsonify(checkouts), 200
+
+@transactions_bp.route('/user/<user_id>/reservations', methods=['GET'])
+def get_user_reservations(user_id):
+    transactions = Transaction.query.filter_by(user_id=user_id, checkout_date=None).all()
+    reservations = [transaction.to_dict() for transaction in transactions]
+    return jsonify(reservations), 200
 
 

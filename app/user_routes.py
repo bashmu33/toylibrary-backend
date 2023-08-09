@@ -24,6 +24,18 @@ def get_one_user(user_id):
     return jsonify(user.to_dict())
 
 
+#GET USER PROFILE INFO BY FIREBASE UID
+@users_bp.route('/profile/<firebase_uid>', methods=['GET'])
+def get_user_profile(firebase_uid):
+    user = User.query.filter_by(firebase_uid=firebase_uid).first()
+
+    if user:
+        return jsonify(user.to_dict()), 200
+    else:
+        return jsonify({'message': 'User not found'}), 404
+
+
+
 #CREATE A NEW USER
 @users_bp.route('', methods=['POST'])
 def create_user():
@@ -75,7 +87,6 @@ def reserve_toy(firebase_uid, toy_id):
 
 
 # Check out a toy
-@users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
 @users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
 def checkout_toy(user_id, toy_id):
     print(f"Attempting to check out Toy {toy_id} for User {user_id}")
@@ -138,7 +149,5 @@ def calculate_fines(user_id):
                 fines += 0.25 * days_overdue
 
     return jsonify({'user_id': user_id, 'fines': fines})
-
-
 
 
