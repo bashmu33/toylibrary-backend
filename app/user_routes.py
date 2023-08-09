@@ -35,7 +35,6 @@ def get_user_profile(firebase_uid):
         return jsonify({'message': 'User not found'}), 404
 
 
-
 #CREATE A NEW USER
 @users_bp.route('', methods=['POST'])
 def create_user():
