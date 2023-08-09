@@ -77,8 +77,11 @@ def reserve_toy(firebase_uid, toy_id):
 # Check out a toy
 @users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
 def checkout_toy(user_id, toy_id):
+    print(f"Attempting to check out Toy {toy_id} for User {user_id}")
     user = validate_model(User, user_id)
     toy = validate_model(Toy, toy_id)
+    print(f"User status: {user}")
+    print(f"Toy status: {toy}")
 
     if toy.toy_status == "checked_out":
         return jsonify({'message': f'Toy with ID {toy_id} is already checked out'}), 400
