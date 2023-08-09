@@ -149,9 +149,9 @@ def calculate_fines(user_id):
 
     return jsonify({'user_id': user_id, 'fines': fines})
 
-@users_bp.route('/uid/<uid>', methods=['GET'])
-def get_user_id_by_uid(uid):
-    user = User.query.filter_by(uid=uid).first()
+@users_bp.route('/uid/<firebase_uid>', methods=['GET'])
+def get_user_id_by_uid(firebase_uid):
+    user = User.query.filter_by(firebase_uid=firebase_uid).first()
 
     if user:
         return jsonify({'user_id': user.user_id})
