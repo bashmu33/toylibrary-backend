@@ -94,17 +94,45 @@ def get_transactions_by_user(user_id):
 
     return jsonify(transactions_response)
 
-# DELETE ALL ALL TRANSACTIONS
+#DELETES ALL TRANSACTIONS!!
 @transactions_bp.route('/delete_all', methods=['DELETE'])
 def delete_all_transactions():
     try:
-        # Delete all transactions
+        # Get all transactions and delete them
+        transactions = Transaction.query.all()
         Transaction.query.delete()
+        
+        # Update toy statuses to "available"
+        for transaction in transactions:
+            toy = Toy.query.get(transaction.toy_id)
+            toy.toy_status = "available"
+
         db.session.commit()
 
-        return jsonify({'message': 'All transactions have been deleted successfully'}), 200
+        return jsonify({'message': 'All transactions have been deleted and toy statuses set to "available" successfully'}), 200
     except Exception as e:
         db.session.rollback()
         abort(make_response({'details': str(e)}, 500))
+
+
+#REMOVES ALL RESERVATIONS!!!
+@transactions_bp.route('/remove_all_reservations', methods=['POST'])
+def remove_all_reservations():
+    try:
+        # Get all reservations
+        reservations = Transaction.query.filter_by(checkout_date=None).all()
+
+        # Update toy statuses to "available" for reservations
+        for reservation in reservations:
+            toy = Toy.query.get(reservation.toy_id)
+            toy.toy_status = "available"
+
+        db.session.commit()
+
+        return jsonify({'message': 'Toy statuses for all reservations have been set to "available" successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        abort(make_response({'details': str(e)}, 500))
+
 
 

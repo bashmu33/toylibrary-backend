@@ -74,7 +74,7 @@ def reserve_toy(firebase_uid, toy_id):
     return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with Firebase UID {firebase_uid}'}), 200
 
 
-#check out a toy
+# Check out a toy
 @users_bp.route('/<user_id>/checkout/<toy_id>', methods=['POST'])
 def checkout_toy(user_id, toy_id):
     user = validate_model(User, user_id)
@@ -99,15 +99,20 @@ def checkout_toy(user_id, toy_id):
         # Check if toy is reserved here
         existing_reservation = Transaction.query.filter_by(user_id=user_id, toy_id=toy_id).first()
         if existing_reservation:
-            existing_reservation.checkout_date = datetime.now().date()
-            existing_reservation.due_date = existing_reservation.checkout_date + timedelta(days=28)
-            toy.toy_status = "checked_out"
+            # Check if the existing reservation belongs to the current user
+            if existing_reservation.user_id == user_id:
+                existing_reservation.checkout_date = datetime.now().date()
+                existing_reservation.due_date = existing_reservation.checkout_date + timedelta(days=28)
+                toy.toy_status = "checked_out"
+                db.session.commit()
+                return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
+            else:
+                return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 400
         else:
             # Below, the toy is reserved by a different user, so it can't be checked out
-            return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 200
+            return jsonify({'message': 'No reservation found for the selected user'}), 400
 
     db.session.commit()
-
     return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
 
 
