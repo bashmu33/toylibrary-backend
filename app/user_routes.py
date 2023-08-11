@@ -158,20 +158,20 @@ def get_user_id_by_uid(firebase_uid):
     else:
         return jsonify({'message': 'User not found'}), 404
 
-@users_bp.route('/<int:user_id>/update_phone', methods=['PUT'])
-def update_user_phone(user_id):
-    user = validate_model(User, user_id)
+# @users_bp.route('/<int:user_id>/update_phone', methods=['PUT'])
+# def update_user_phone(user_id):
+#     user = validate_model(User, user_id)
 
-    request_data = request.get_json()
-    new_phone_number = request_data.get('phone_number')
+#     request_data = request.get_json()
+#     new_phone_number = request_data.get('phone_number')
 
-    if not new_phone_number:
-        return jsonify({'message': 'Phone number is required'}), 400
+#     if not new_phone_number:
+#         return jsonify({'message': 'Phone number is required'}), 400
 
-    user.update_phone_number(new_phone_number)
-    db.session.commit()
+#     user.update_phone_number(new_phone_number)
+#     db.session.commit()
 
-    return jsonify({'message': f'Phone number for user with ID {user_id} has been updated'}), 200
+#     return jsonify({'message': f'Phone number for user with ID {user_id} has been updated'}), 200
 
 
 

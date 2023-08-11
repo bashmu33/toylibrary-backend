@@ -8,7 +8,7 @@ import os
 
 load_dotenv()
 
-# Initialize the Flask app
+
 app = create_app()
 
 
@@ -18,17 +18,12 @@ with app.app_context():
 
     # Define the function to send SMS notifications
     def send_sms_notification(phone_number, message):
-    # Check if the phone number starts with "+1"
-        if not phone_number.startswith("+1"):
-            phone_number_with_country_code = '+1' + phone_number
-        else:
-            phone_number_with_country_code = phone_number
         
         try:
             twilio_client.messages.create(
                 body=message,
                 from_=os.environ.get('TWILIO_PHONE_NUMBER'),
-                to=phone_number_with_country_code  # Use the phone number with country code
+                to=phone_number 
             )
             print("SMS notification sent successfully.")
         except Exception as e:
@@ -37,9 +32,12 @@ with app.app_context():
     # Define the function to send due date notifications
     def send_due_date_notifications():
         print("Checking due date notifications...")
-
-        due_date_limit = datetime.now().date()
-        # due_date_limit = today + timedelta(days=2)
+     
+        #test for immediate notification
+        # due_date_limit = datetime.now().date()
+        
+        today = datetime.now().date()
+        due_date_limit = today + timedelta(days=2)
 
         transactions_to_notify = Transaction.query.filter_by(due_date=due_date_limit).all()
 
@@ -49,9 +47,8 @@ with app.app_context():
                 print(f"Sending due date notification to {user.phone_number}")
                 send_sms_notification(user.phone_number, f"Hi {user.first_name}, this is a reminder that your toy is due in 2 days. Please return it on time. - The FW Toy Library")
 
-    print("Starting the script...")
 
-    # Call the function to send due date notifications
+    
     send_due_date_notifications()
 
 
@@ -64,35 +61,32 @@ with app.app_context():
 # from dotenv import load_dotenv
 # load_dotenv()
 
-# # Initialize the Flask app
 # app = create_app()
 
-# # Initialize Twilio client
 # twilio_client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
 
-# # Define the function to send SMS notifications
+
 # def send_sms_notification(phone_number, message):
-#     # Add "+1" country code to the phone number
-#     phone_number_with_country_code = '+1' + phone_number
+
     
 #     try:
 #         twilio_client.messages.create(
 #             body=message,
 #             from_=os.environ.get('TWILIO_PHONE_NUMBER'),
-#             to=phone_number_with_country_code
+#             to=phone_number
 #         )
 #         print("SMS notification sent successfully.")
 #     except Exception as e:
 #         print(f"Error sending SMS notification: {str(e)}")
 
-# # Define the function to send a test notification immediately
+
 # def send_test_notification():
-#     test_phone_number = '2602417093'  # Replace with your test phone number
+#     test_phone_number = '+12602417093'  # Replace with your test phone number
 #     test_message = "This is a test notification for immediate testing."
 
 #     send_sms_notification(test_phone_number, test_message)
 
-# # Call the send_test_notification function to send the immediate test notification
+
 # send_test_notification()
 
 
@@ -108,7 +102,7 @@ with app.app_context():
 
 # load_dotenv()
 
-# # Retrieve Twilio credentials from environment variables
+
 # account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
 # auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
 # twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
@@ -116,7 +110,7 @@ with app.app_context():
 # # Initialize Twilio client
 # client = Client(account_sid, auth_token)
 
-# # Define recipient phone number
+
 # recipient_phone_number = '+12602417093'  # Replace with the recipient phone number you want to use
 
 # # Send a test message
