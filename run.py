@@ -1,130 +1,129 @@
 from dotenv import load_dotenv
-load_dotenv() 
-from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from app import create_app, db
 from app.models import User, Transaction
 from twilio.rest import Client
 import os
 
-# Initialize Twilio client
-twilio_client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
 
-# Define the function to send SMS notifications
-def send_sms_notification(phone_number, message):
-    # Add "+1" country code to the phone number
-    phone_number_with_country_code = "+1" + phone_number
-    
-    try:
-        twilio_client.messages.create(
-            body=message,
-            from_=app.config['TWILIO_PHONE_NUMBER'],
-            to=phone_number_with_country_code 
-        )
-        print("SMS notification sent successfully.")
-    except Exception as e:
-        print(f"Error sending SMS notification: {str(e)}")
+load_dotenv()
 
-# Define the function to send due date notifications
-def send_due_date_notifications():
-    today = datetime.now().date()
-    due_date_limit = today + timedelta(days=2)
-
-    transactions_to_notify = Transaction.query.filter_by(due_date=due_date_limit).all()
-
-    for transaction in transactions_to_notify:
-        user = User.query.get(transaction.user_id)
-        if user and user.phone_number:
-            send_sms_notification(user.phone_number, f"Hi {user.first_name}, this is a reminder that your toy is due in 2 days. Please return it on time. - FW Toy Library")
-
-# Set up the scheduler and start it
-scheduler = BackgroundScheduler()
-scheduler.add_job(send_due_date_notifications, 'interval', days=1)
-scheduler.start()
-
-# Run the Flask app
+# Initialize the Flask app
 app = create_app()
-if __name__ == "__main__":
-    app.run()
 
 
-# #TEST VERSION
+with app.app_context():
+   
+    twilio_client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
+
+    # Define the function to send SMS notifications
+    def send_sms_notification(phone_number, message):
+    # Check if the phone number starts with "+1"
+        if not phone_number.startswith("+1"):
+            phone_number_with_country_code = '+1' + phone_number
+        else:
+            phone_number_with_country_code = phone_number
+        
+        try:
+            twilio_client.messages.create(
+                body=message,
+                from_=os.environ.get('TWILIO_PHONE_NUMBER'),
+                to=phone_number_with_country_code  # Use the phone number with country code
+            )
+            print("SMS notification sent successfully.")
+        except Exception as e:
+            print(f"Error sending SMS notification: {str(e)}")
+
+    # Define the function to send due date notifications
+    def send_due_date_notifications():
+        print("Checking due date notifications...")
+
+        due_date_limit = datetime.now().date()
+        # due_date_limit = today + timedelta(days=2)
+
+        transactions_to_notify = Transaction.query.filter_by(due_date=due_date_limit).all()
+
+        for transaction in transactions_to_notify:
+            user = User.query.get(transaction.user_id)
+            if user and user.phone_number:
+                print(f"Sending due date notification to {user.phone_number}")
+                send_sms_notification(user.phone_number, f"Hi {user.first_name}, this is a reminder that your toy is due in 2 days. Please return it on time. - The FW Toy Library")
+
+    print("Starting the script...")
+
+    # Call the function to send due date notifications
+    send_due_date_notifications()
+
+
+
+
+
+
+#TEST the functions BELOW
+
 # from dotenv import load_dotenv
-# load_dotenv() 
-# from apscheduler.schedulers.background import BackgroundScheduler
-# from datetime import datetime, timedelta
-# from app import create_app, db
-# from app.models import User, Transaction
-# from twilio.rest import Client
-# import os
+# load_dotenv()
 
+# # Initialize the Flask app
 # app = create_app()
 
-
+# # Initialize Twilio client
 # twilio_client = Client(os.environ.get('TWILIO_ACCOUNT_SID'), os.environ.get('TWILIO_AUTH_TOKEN'))
 
-# # Create a test version of send_sms_notification
+# # Define the function to send SMS notifications
 # def send_sms_notification(phone_number, message):
 #     # Add "+1" country code to the phone number
-#     phone_number_with_country_code = "+1" + phone_number
-    
-#     # Update the desired phone number here
-#     test_phone_number = "+12602417093"
+#     phone_number_with_country_code = '+1' + phone_number
     
 #     try:
-#         print(f"Sending test SMS to: {test_phone_number}")
-#         print(f"Test message: {message}")
-#     except Exception as e:
-#         print(f"Error sending test SMS: {str(e)}")
-
-
-# #
-# def send_due_date_notifications():
-#     today = datetime.now().date()
-#     due_date_limit = today + timedelta(days=2)
-
-#     transactions_to_notify = Transaction.query.filter_by(due_date=due_date_limit).all()
-
-#     for transaction in transactions_to_notify:
-#         user = User.query.get(transaction.user_id)
-#         if user and user.phone_number:
-#             send_sms_notification(user.phone_number, f"Hi {user.first_name}, this is a reminder that your toy is due in 2 days. Please return it on time. - The Toy Library")
-
-# #trigger an immediate test notification
-# with app.app_context():
-#     #TEST USER
-#     user = User.query.filter_by(email='test@example.com').first()
-#     if not user:
-#         user = User(
-#             firebase_uid='test_user1',
-#             first_name='Test1',
-#             last_name='User1',
-#             date_of_birth=datetime(2000, 1, 1),
-#             email='test1@example.com',
-#             phone_number='2602417093'
+#         twilio_client.messages.create(
+#             body=message,
+#             from_=os.environ.get('TWILIO_PHONE_NUMBER'),
+#             to=phone_number_with_country_code
 #         )
-#         db.session.add(user)
-#         db.session.commit()
+#         print("SMS notification sent successfully.")
+#     except Exception as e:
+#         print(f"Error sending SMS notification: {str(e)}")
 
-#     #TEST TRANSACTION
-#     due_date = datetime.now() + timedelta(minutes=5)
-#     transaction = Transaction(
-#         checkout_date=datetime.now(),
-#         due_date=due_date,
-#         user_id=user.user_id,
-#         toy_id=36  # Replace with the actual toy ID from your database
-#     )
-#     db.session.add(transaction)
-#     db.session.commit()
+# # Define the function to send a test notification immediately
+# def send_test_notification():
+#     test_phone_number = '2602417093'  # Replace with your test phone number
+#     test_message = "This is a test notification for immediate testing."
 
-#     # Send test notification
-#     send_sms_notification(user.phone_number, f"Hi {user.first_name}, this is a test notification for your toy that is due soon. Please return it on time. - The Toy Library")
+#     send_sms_notification(test_phone_number, test_message)
 
-# # Set up the scheduler and start it
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(send_due_date_notifications, 'interval', days=1)
-# scheduler.start()
+# # Call the send_test_notification function to send the immediate test notification
+# send_test_notification()
 
-# # Run the Flask app
-# if __name__ == "__main__":
-#     app.run()
+
+
+
+#ANOTHER TEST....#
+
+
+# from twilio.rest import Client
+# import os
+# from dotenv import load_dotenv
+
+
+# load_dotenv()
+
+# # Retrieve Twilio credentials from environment variables
+# account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+# auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+# twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
+
+# # Initialize Twilio client
+# client = Client(account_sid, auth_token)
+
+# # Define recipient phone number
+# recipient_phone_number = '+12602417093'  # Replace with the recipient phone number you want to use
+
+# # Send a test message
+# message = client.messages.create(
+#     from_=twilio_phone_number,
+#     body='This is a test message from Twilio.',
+#     to=recipient_phone_number
+# )
+
+# print(message.sid)

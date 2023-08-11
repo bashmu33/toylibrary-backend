@@ -10,6 +10,11 @@ class User(db.Model):
     phone_number = db.Column(db.String)
     transactions = db.relationship('Transaction', backref='user', lazy=True)
 
+
+    def update_phone_number(self, new_phone_number):
+        self.phone_number = '+1' + new_phone_number
+
+
     def to_dict(self):
         return {
             'user_id': self.user_id,
