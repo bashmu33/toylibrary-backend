@@ -42,29 +42,31 @@ def remove_reservation(user_id, toy_id):
         abort(make_response({'details': str(e)}, 500))
 
 
-
-#return a toy 
-@transactions_bp.route('/<transaction_id>/return_toy', methods=['POST'])
-def return_toy(transaction_id):
-    transaction = validate_model(Transaction, transaction_id)
-
-    if not transaction.checkout_date:
-        return jsonify({'message': 'This toy was not checked out and cannot be returned'}), 400
-
-    if transaction.return_date is not None:
-        return jsonify({'message': 'This toy has already been returned'}), 400
-
+#return a toy route
+@transactions_bp.route('/return_toy/<toy_id>', methods=['POST'])
+def return_toy(toy_id):
     try:
-        transaction.return_date = datetime.now().date()
-        db.session.commit()
+        transaction = Transaction.query.filter(
+            Transaction.toy_id == toy_id,
+            Transaction.checkout_date.isnot(None),
+            Transaction.return_date.is_(None)
+        ).first()
 
-        toy = Toy.query.get(transaction.toy_id)
+        if not transaction:
+            return jsonify({'message': 'Transaction not found for the specified toy'}), 404
+
+        transaction.return_date = date.today()
+        toy = Toy.query.get(toy_id)
         toy.toy_status = "available"
+
         db.session.commit()
 
         return jsonify({'message': 'Toy has been returned successfully and is now available for others to reserve/checkout'}), 200
     except Exception as e:
+        db.session.rollback()
         abort(make_response({'details': str(e)}, 500))
+
+
 
 #get all transactions by user
 @transactions_bp.route('/user/<user_id>', methods=['GET'])
