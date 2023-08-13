@@ -101,7 +101,7 @@ def checkout_toy(user_id, toy_id):
         # Check if user has already checked out 4 toys
         checked_out_toys_count = Transaction.query.filter_by(user_id=user_id, checkout_date=None).count()
         if checked_out_toys_count >= 4:
-            return jsonify({'message': 'User has already checked out the maximum number of toys (4)'}), 400
+            return jsonify({'message': 'User has already checked out the maximum number of toys (4)'}), 200
 
         # Checking out toy
         checkout_date = datetime.now().date()
@@ -121,10 +121,10 @@ def checkout_toy(user_id, toy_id):
                 db.session.commit()
                 return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
             else:
-                return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 400
+                return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 200
         else:
             # Below, the toy is reserved by a different user, so it can't be checked out
-            return jsonify({'message': 'No reservation found for the selected user'}), 400
+            return jsonify({'message': 'No reservation found for the selected user'}), 200
 
     db.session.commit()
     return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
