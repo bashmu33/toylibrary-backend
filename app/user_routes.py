@@ -72,9 +72,9 @@ def reserve_toy(firebase_uid, toy_id):
     toy = validate_model(Toy, toy_id)
 
     if toy.toy_status == "checked_out":
-        return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and unavailable for reservation'}), 200
+        return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and unavailable for reservation'}), 400
     elif toy.toy_status == "reserved":
-        return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 200
+        return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 400
 
     new_transaction = Transaction(user_id=user.user_id, toy_id=toy_id, reserve_date=datetime.now().date())
     db.session.add(new_transaction)
@@ -82,7 +82,7 @@ def reserve_toy(firebase_uid, toy_id):
     toy.toy_status = "reserved"
     db.session.commit()
 
-    return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with Firebase UID {firebase_uid}'}), 200
+    return jsonify({'message': f'Toy with ID {toy_id} has been reserved by user with Firebase UID {firebase_uid}'}), 400
 
 
 # Check out a toy
@@ -101,7 +101,7 @@ def checkout_toy(user_id, toy_id):
         # Check if user has already checked out 4 toys
         checked_out_toys_count = Transaction.query.filter_by(user_id=user_id, checkout_date=None).count()
         if checked_out_toys_count >= 4:
-            return jsonify({'message': 'User has already checked out the maximum number of toys (4)'}), 200
+            return jsonify({'message': 'User has already checked out the maximum number of toys (4)'}), 400
 
         # Checking out toy
         checkout_date = datetime.now().date()
@@ -121,10 +121,10 @@ def checkout_toy(user_id, toy_id):
                 db.session.commit()
                 return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
             else:
-                return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 200
+                return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 400
         else:
             # Below, the toy is reserved by a different user, so it can't be checked out
-            return jsonify({'message': 'No reservation found for the selected user'}), 200
+            return jsonify({'message': 'No reservation found for the selected user'}), 400
 
     db.session.commit()
     return jsonify({'message': f'Toy with ID {toy_id} has been checked out by user with ID {user_id}'}), 200
