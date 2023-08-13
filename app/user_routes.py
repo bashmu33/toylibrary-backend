@@ -72,9 +72,9 @@ def reserve_toy(firebase_uid, toy_id):
     toy = validate_model(Toy, toy_id)
 
     if toy.toy_status == "checked_out":
-        return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and unavailable for reservation'}), 400
+        return jsonify({'message': f'Toy with ID {toy_id} is currently checked out and unavailable for reservation'}), 200
     elif toy.toy_status == "reserved":
-        return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 400
+        return jsonify({'message': f'Toy with ID {toy_id} is already reserved and unavailable for reservation'}), 200
 
     new_transaction = Transaction(user_id=user.user_id, toy_id=toy_id, reserve_date=datetime.now().date())
     db.session.add(new_transaction)

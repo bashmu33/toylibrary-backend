@@ -103,18 +103,20 @@ def delete_all_transactions():
         # Get all transactions and delete them
         transactions = Transaction.query.all()
         Transaction.query.delete()
-        
-        # Update toy statuses to "available"
+
+        # Update toy statuses to "available" for transactions with valid toy_id
         for transaction in transactions:
-            toy = Toy.query.get(transaction.toy_id)
-            toy.toy_status = "available"
+            if transaction.toy_id is not None:
+                toy = Toy.query.get(transaction.toy_id)
+                toy.toy_status = "available"
 
         db.session.commit()
 
-        return jsonify({'message': 'All transactions have been deleted and toy statuses set to "available" successfully'}), 200
+        return jsonify({'message': 'All transactions have been deleted, and toy statuses set to "available" successfully'}), 200
     except Exception as e:
         db.session.rollback()
         abort(make_response({'details': str(e)}, 500))
+
 
 
 #REMOVES ALL RESERVATIONS!!!
