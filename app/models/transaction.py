@@ -21,7 +21,7 @@ class Transaction(db.Model):
 
         reserve_status = 'reserved' if self.reserve_date and not self.checkout_date else None
 
-        # Calculate overdue fines 
+        #overdue fines 
         overdue_fines = 0.0
         if self.checkout_date and self.return_date and self.return_date > self.due_date:
             days_overdue = (self.return_date - self.due_date).days

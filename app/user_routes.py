@@ -113,7 +113,7 @@ def checkout_toy(user_id, toy_id):
         # Check if toy is reserved here
         existing_reservation = Transaction.query.filter_by(user_id=user_id, toy_id=toy_id).first()
         if existing_reservation:
-            # Check if the existing reservation belongs to the specified user
+            
             if existing_reservation.user_id == int(user_id):
                 existing_reservation.checkout_date = datetime.now().date()
                 existing_reservation.due_date = existing_reservation.checkout_date + timedelta(days=28)
@@ -123,7 +123,6 @@ def checkout_toy(user_id, toy_id):
             else:
                 return jsonify({'message': 'Selected user does not match the user who reserved the toy'}), 400
         else:
-            # Below, the toy is reserved by a different user, so it can't be checked out
             return jsonify({'message': 'No reservation found for the selected user'}), 400
 
     db.session.commit()
